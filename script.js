@@ -1,6 +1,3 @@
-const apiKey = 'b6fd43b5ec8af8ebd939ef6ad98e3f10'; // Free API key
-const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
-
 const cityInput = document.getElementById('cityInput');
 const searchBtn = document.getElementById('searchBtn');
 const cityName = document.getElementById('cityName');
@@ -25,21 +22,31 @@ async function fetchWeather() {
     }
 
     try {
-        const response = await fetch(`${apiUrl}?q=${city}&appid=${apiKey}&units=metric`);
+        // Using Open-Meteo API (no API key needed!)
+        const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=en&format=json`);
+        const geoData = await geoResponse.json();
 
-        if (!response.ok) {
+        if (!geoData.results || geoData.results.length === 0) {
             alert('City not found! Please try again.');
             return;
         }
 
-        const data = await response.json();
+        const location = geoData.results[0];
+        const lat = location.latitude;
+        const lon = location.longitude;
+        const countryCode = location.country_code;
 
-        // Update the UI with weather data
-        cityName.textContent = `${data.name}, ${data.sys.country}`;
-        temperature.textContent = `${Math.round(data.main.temp)}°C`;
-        description.textContent = data.weather[0].main;
-        humidity.textContent = `Humidity: ${data.main.humidity}%`;
-        windSpeed.textContent = `Wind Speed: ${data.wind.speed} km/h`;
+        // Get weather data
+        const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=celsius`);
+        const weatherData = await weatherResponse.json();
+        const current = weatherData.current;
+
+        // Update UI
+        cityName.textContent = `${location.name}, ${countryCode}`;
+        temperature.textContent = `${Math.round(current.temperature_2m)}°C`;
+        description.textContent = getWeatherDescription(current.weather_code);
+        humidity.textContent = `Humidity: ${current.relative_humidity_2m}%`;
+        windSpeed.textContent = `Wind Speed: ${Math.round(current.wind_speed_10m)} km/h`;
 
     } catch (error) {
         console.error('Error fetching weather:', error);
@@ -47,8 +54,38 @@ async function fetchWeather() {
     }
 }
 
+function getWeatherDescription(code) {
+    const descriptions = {
+        0: 'Clear sky',
+        1: 'Mainly clear',
+        2: 'Partly cloudy',
+        3: 'Overcast',
+        45: 'Foggy',
+        48: 'Depositing rime fog',
+        51: 'Light drizzle',
+        53: 'Moderate drizzle',
+        55: 'Dense drizzle',
+        61: 'Slight rain',
+        63: 'Moderate rain',
+        65: 'Heavy rain',
+        71: 'Slight snow',
+        73: 'Moderate snow',
+        75: 'Heavy snow',
+        77: 'Snow grains',
+        80: 'Slight rain showers',
+        81: 'Moderate rain showers',
+        82: 'Violent rain showers',
+        85: 'Slight snow showers',
+        86: 'Heavy snow showers',
+        95: 'Thunderstorm',
+        96: 'Thunderstorm with slight hail',
+        99: 'Thunderstorm with heavy hail'
+    };
+    return descriptions[code] || 'Unknown';
+}
+
 // Fetch weather for London on page load
 window.addEventListener('load', () => {
     cityInput.value = 'London';
     fetchWeather();
-}); 
+});
