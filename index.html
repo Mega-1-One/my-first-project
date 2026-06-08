@@ -8,24 +8,51 @@
 </head>
 <body>
     <div class="container">
-        <h1>Weather Dashboard</h1>
+        <div class="header">
+            <h1>Weather Dashboard</h1>
+            <button id="themeToggle" class="theme-btn">🌙 Dark Mode</button>
+        </div>
         
         <div class="search-box">
             <input type="text" id="cityInput" placeholder="Enter city name...">
             <button id="searchBtn">Search</button>
+            <button id="geoBtn" title="Use my location">📍</button>
         </div>
 
+        <!-- Current Weather -->
         <div id="weatherContainer" class="weather-container">
             <div class="weather-card">
                 <h2 id="cityName">City Name</h2>
+                <div class="weather-icon-large">
+                    <span id="weatherIcon">☀️</span>
+                </div>
                 <p id="temperature">--°C</p>
                 <p id="description">Weather description</p>
                 <p id="humidity">Humidity: --%</p>
                 <p id="windSpeed">Wind Speed: -- km/h</p>
             </div>
         </div>
+
+        <!-- 5-Day Forecast -->
+        <div class="forecast-section">
+            <h3>5-Day Forecast</h3>
+            <div id="forecastContainer" class="forecast-container"></div>
+        </div>
+
+        <!-- Search History -->
+        <div class="history-section">
+            <h3>Search History</h3>
+            <div id="historyContainer" class="history-container"></div>
+        </div>
+
+        <!-- Favorite Cities -->
+        <div class="favorites-section">
+            <h3>Favorite Cities</h3>
+            <div id="favoritesContainer" class="favorites-container"></div>
+            <button id="addFavoriteBtn" class="add-favorite-btn">⭐ Add to Favorites</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-</html> 
+</html>
